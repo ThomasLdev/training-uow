@@ -42,11 +42,13 @@ final readonly class PropertyExtractor
 
     private function extractColumnAttribute(ReflectionProperty $property): void
     {
-        $column = $property->getAttributes(Column::class)[0]?->newInstance() ?? null;
+        $columnAttributes = $property->getAttributes(Column::class);
 
-        if (!$column instanceof Column) {
+        if ([] === $columnAttributes) {
             return;
         }
+
+        $column = $columnAttributes[0]->newInstance();
 
         $this->entityAttributes->addFieldMetadata(new FieldMetadata(
             propertyName : $property->getName(),

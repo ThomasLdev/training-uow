@@ -37,12 +37,12 @@ final class EntityMetadataFactory
 
     private function getEntityTableName(ReflectionClass $reflection): string
     {
-        $table = $reflection->getAttributes(Table::class)[0]->newInstance();
+        $table = $reflection->getAttributes(Table::class)[0] ?? null;
 
-        if (!$table instanceof Table) {
+        if (null === $table) {
             throw ExtractionException::cannotFindTableName($reflection->getName());
         }
 
-        return $table->name;
+        return $table->newInstance()->name;
     }
 }
