@@ -12,10 +12,8 @@ class Column
 {
     public function __construct(
         public string $name,
-        public Type   $type,
-        public bool   $nullable = false,
-        public ?int   $length = null
-    )
-    {
-    }
+        public Type $type,
+        public bool $nullable = false,
+        public ?int $length = null,
+    ) {}
 }

@@ -9,7 +9,7 @@ $tables = json_decode(
     file_get_contents(__DIR__ . '/../schema/schema.json'),
     true,
     512,
-    JSON_THROW_ON_ERROR
+    JSON_THROW_ON_ERROR,
 );
 $database = new PDO('pgsql:host=postgres;dbname=training_uow', 'app', 'app');
 
@@ -20,7 +20,7 @@ $database = new PDO('pgsql:host=postgres;dbname=training_uow', 'app', 'app');
  *     columns: array<array-key, array{name: string, type: string, nullable: bool, default: mixed}>
  * } $table
  */
-foreach($tables as $table) {
+foreach ($tables as $table) {
     $tableName = $table['table_name'];
     $tableExist = $database
         ->query(<<<SQL
@@ -40,7 +40,7 @@ foreach($tables as $table) {
 
     $columnParts = [];
 
-    foreach($table['columns'] as $column) {
+    foreach ($table['columns'] as $column) {
         $nullable = !$column['nullable'] ? 'NOT NULL' : '';
 
         if ($column['default'] === null) {

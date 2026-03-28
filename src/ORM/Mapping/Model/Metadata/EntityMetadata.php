@@ -10,9 +10,7 @@ final readonly class EntityMetadata
         public string $entityFQCN,
         public string $tableName,
         public string $primaryKey,
-        /* @var list<FieldMetadata> $fieldsMetadata */
+        /** @var array<string, FieldMetadata> $fieldsMetadata */
         public array $fieldsMetadata,
-    )
-    {
-    }
+    ) {}
 }

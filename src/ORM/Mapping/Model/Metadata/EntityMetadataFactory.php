@@ -11,6 +11,7 @@ use TrainingUow\ORM\Mapping\Entity\Property\Extract\PropertyExtractor;
 
 final class EntityMetadataFactory
 {
+    /** @var array<string, EntityMetadata> */
     private static array $cache = [];
 
     public function createFromEntity(object $entity): EntityMetadata
@@ -35,6 +36,7 @@ final class EntityMetadataFactory
         return $metadata;
     }
 
+    /** @param ReflectionClass<object> $reflection */
     private function getEntityTableName(ReflectionClass $reflection): string
     {
         $table = $reflection->getAttributes(Table::class)[0] ?? null;

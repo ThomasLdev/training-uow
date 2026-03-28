@@ -6,7 +6,4 @@ namespace TrainingUow\ORM\Mapping\Model\Metadata\Exception;
 
 use RuntimeException;
 
-class EntityMetadataException extends RuntimeException
-{
-
-}
+class EntityMetadataException extends RuntimeException {}

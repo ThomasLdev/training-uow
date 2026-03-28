@@ -11,11 +11,9 @@ final class EntityAttributes
 {
     public function __construct(
         public string $primaryKey = '',
-        /* @var array<string, FieldMetadata> */
+        /** @var array<string, FieldMetadata> */
         public array $fieldsMetadata = [],
-    )
-    {
-    }
+    ) {}
 
     public function addFieldMetadata(FieldMetadata $fieldMetadata): void
     {

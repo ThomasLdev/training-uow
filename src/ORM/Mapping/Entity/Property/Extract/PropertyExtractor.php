@@ -14,6 +14,7 @@ final readonly class PropertyExtractor
 {
     private EntityAttributes $entityAttributes;
 
+    /** @param ReflectionClass<object> $reflection */
     public function __construct(private ReflectionClass $reflection)
     {
         $this->entityAttributes = new EntityAttributes();
@@ -21,7 +22,7 @@ final readonly class PropertyExtractor
 
     public function extract(): EntityAttributes
     {
-        foreach($this->reflection->getProperties() as $property) {
+        foreach ($this->reflection->getProperties() as $property) {
             $this->setPrimaryKey($property);
             $this->extractColumnAttribute($property);
         }

@@ -14,7 +14,5 @@ class FieldMetadata
         public Type $type,
         public ?int $length = null,
         public bool $nullable = false,
-    )
-    {
-    }
+    ) {}
 }

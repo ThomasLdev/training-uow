@@ -1,8 +1,8 @@
 includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/tomasvotruba/cognitive-complexity/config/extension.neon
 
 parameters:
     level: 9
     paths:
         - src
-        - scripts
