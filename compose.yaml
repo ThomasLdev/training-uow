@@ -1,0 +1,26 @@
+services:
+  php:
+    build: .
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: training_uow
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d training_uow"]
+      interval: 2s
+      timeout: 5s
+      retries: 5
