@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Mapping\Entity\Property\Extract;
 
-use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionProperty;
 use TrainingUow\ORM\Mapping\Attributes\Column;
@@ -39,19 +38,17 @@ final readonly class PropertyExtractor
 
     private function extractColumnAttribute(ReflectionProperty $property): void
     {
-        $column = $property->getAttributes(Column::class)[0] ?? null;
+        $column = $property->getAttributes(Column::class)[0]->newInstance();
 
-        if (!$column instanceof ReflectionAttribute) {
+        if (!$column instanceof Column) {
             return;
         }
 
-        $arguments = $column->getArguments();
-
         $this->entityAttributes->addFieldMetadata(new FieldMetadata(
-            name: $arguments['name'],
-            type: $arguments['type'],
-            length: $arguments['length'] ?? null,
-            nullable: $arguments['nullable'] ?? false,
+            name: $column->name,
+            type: $column->type,
+            length: $column->length,
+            nullable: $column->nullable,
         ));
     }
 }

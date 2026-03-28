@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Mapping\Model\Metadata;
 
-use ReflectionAttribute;
 use ReflectionClass;
 use TrainingUow\ORM\Mapping\Attributes\Table;
 use TrainingUow\ORM\Mapping\Entity\Property\Extract\Exception\ExtractionException;
@@ -12,22 +11,19 @@ use TrainingUow\ORM\Mapping\Entity\Property\Extract\PropertyExtractor;
 
 final class EntityMetadataFactory
 {
-    private array $cache = [];
+    private static array $cache = [];
 
     private ReflectionClass $reflection;
 
     private string $entityFQCN;
 
-    public function __construct(private readonly object $entity)
+    public function createFromEntity(object $entity): EntityMetadata
     {
-        $this->reflection = new ReflectionClass($this->entity);
-        $this->entityFQCN = $this->entity::class;
-    }
+        $this->reflection = new ReflectionClass($entity);
+        $this->entityFQCN = $entity::class;
 
-    public function createFromEntity(): EntityMetadata
-    {
-        if (array_key_exists($this->entityFQCN, $this->cache)) {
-            return $this->cache[$this->entityFQCN];
+        if (array_key_exists($this->entityFQCN, self::$cache)) {
+            return self::$cache[$this->entityFQCN];
         }
 
         $propertyAttributes = new PropertyExtractor($this->reflection)->extract();
@@ -38,19 +34,19 @@ final class EntityMetadataFactory
             fieldsMetadata: $propertyAttributes->fieldsMetadata,
         );
 
-        $this->cache[$this->entityFQCN] = $metadata;
+        self::$cache[$this->entityFQCN] = $metadata;
 
         return $metadata;
     }
 
     private function getEntityTableName(): string
     {
-        $table = $this->reflection->getAttributes(Table::class)[0];
+        $table = $this->reflection->getAttributes(Table::class)[0]->newInstance();
 
-        if (!$table instanceof ReflectionAttribute) {
+        if (!$table instanceof Table) {
             throw ExtractionException::cannotFindTableName($this->entityFQCN);
         }
 
-        return $table->getArguments()['name'];
+        return $table->name;
     }
 }
