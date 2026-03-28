@@ -21,14 +21,8 @@ jobs:
 
       - run: composer install --no-interaction --prefer-dist
 
-      - name: PHPUnit
-        run: vendor/bin/phpunit --testdox
+      - name: Install Castor
+        run: curl -Ls https://castor.jolicode.com/install | bash && mv ~/.local/bin/castor /usr/local/bin/castor
 
-      - name: PHPStan
-        run: vendor/bin/phpstan analyse
-
-      - name: PHP CS Fixer
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
-
-      - name: Rector
-        run: vendor/bin/rector --dry-run
+      - name: Run CI checks
+        run: castor ci

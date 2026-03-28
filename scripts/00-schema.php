@@ -41,19 +41,15 @@ foreach ($tables as $table) {
     $columnParts = [];
 
     foreach ($table['columns'] as $column) {
-        $nullable = !$column['nullable'] ? 'NOT NULL' : '';
+        $nullable = $column['nullable'] ? '' : 'NOT NULL';
 
-        if ($column['default'] === null) {
-            $default = 'NULL';
-        } else {
-            $default = "'" . $column['default'] . "'";
-        }
+        $default = $column['default'] === null ? 'NULL' : "'" . $column['default'] . "'";
 
         $columnParts[] = "{$column['name']} {$column['type']} {$nullable} DEFAULT {$default}";
     }
 
     $columnsSQL = implode(', ', $columnParts);
-    $primaryKeyColumns = implode(', ', array_map(fn(string $key) => "{$key} SERIAL", $table['primary_key']));
+    $primaryKeyColumns = implode(', ', array_map(fn(string $key): string => "{$key} SERIAL", $table['primary_key']));
     $primaryKeyConstraint = implode(', ', $table['primary_key']);
 
     $database->query(<<<SQL
