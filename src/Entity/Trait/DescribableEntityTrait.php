@@ -2,16 +2,40 @@
 
 declare(strict_types=1);
 
-namespace Entity\Trait;
+namespace TrainingUow\Entity\Trait;
 
-use ORM\Mapping\Attributes\Column;
-use ORM\Mapping\Attributes\Enum\Type;
+use TrainingUow\ORM\Mapping\Attributes\Column;
+use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
 
 trait DescribableEntityTrait
 {
     #[Column(name: 'title', type: Type::String, length: 255)]
-    private(set) string $title = '';
+    private string $title = '';
 
     #[Column(name: 'description', type: Type::Text)]
-    private(set) string $description = '';
+    private string $description = '';
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
 }

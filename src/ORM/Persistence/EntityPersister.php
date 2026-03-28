@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ORM\Persistence;
+namespace TrainingUow\ORM\Persistence;
 
-use ORM\Mapping\Model\Metadata\EntityMetadata;
-use ORM\Mapping\Model\Metadata\EntityMetadataFactory;
-use ORM\Persistence\Exception\EntityPersistenceException;
+use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
+use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
+use TrainingUow\ORM\Persistence\Exception\EntityPersistenceException;
 use PDO;
 use ReflectionClass;
 
@@ -22,6 +22,7 @@ final readonly class EntityPersister implements EntityPersisterInterface
     {
         $this->metadata = new EntityMetadataFactory($entity)->createFromEntity();
 
+        // TODO : implement the insert logic from the metadata
     }
 
     private function setEntityId(object $entity): void

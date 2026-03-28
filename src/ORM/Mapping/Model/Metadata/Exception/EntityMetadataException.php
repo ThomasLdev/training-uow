@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ORM\Mapping\Model\Metadata\Exception;
+namespace TrainingUow\ORM\Mapping\Model\Metadata\Exception;
 
 use RuntimeException;
 

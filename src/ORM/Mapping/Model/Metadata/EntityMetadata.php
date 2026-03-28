@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ORM\Mapping\Model\Metadata;
+namespace TrainingUow\ORM\Mapping\Model\Metadata;
 
 final readonly class EntityMetadata
 {
@@ -10,7 +10,8 @@ final readonly class EntityMetadata
         public string $entityFQCN,
         public string $tableName,
         public string $primaryKey,
-        public array $fields,
+        /* @var list<FieldMetadata> $fieldsMetadata */
+        public array $fieldsMetadata,
     )
     {
     }

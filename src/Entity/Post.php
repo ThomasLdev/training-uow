@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Entity;
+namespace TrainingUow\Entity;
 
-use Entity\Trait\DescribableEntityTrait;
-use Entity\Trait\PrimaryKeyTrait;
-use ORM\Mapping\Attributes\Column;
-use ORM\Mapping\Attributes\Enum\Type;
-use ORM\Mapping\Attributes\Table;
+use TrainingUow\Entity\Trait\DescribableEntityTrait;
+use TrainingUow\Entity\Trait\PrimaryKeyTrait;
+use TrainingUow\ORM\Mapping\Attributes\Column;
+use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
+use TrainingUow\ORM\Mapping\Attributes\Table;
 
 #[Table(name: 'post')]
 class Post
@@ -17,8 +17,32 @@ class Post
     use DescribableEntityTrait;
 
     #[Column(name: 'content', type: Type::Text)]
-    private(set) string $content = '';
+    private string $content = '';
 
     // TODO : create relation attributes
-    private(set) ?Category $category = null;
+    private ?Category $category = null;
+
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): self
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): self
+    {
+        $this->category = $category;
+
+        return $this;
+    }
 }

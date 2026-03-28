@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Entity\Trait;
+namespace TrainingUow\Entity\Trait;
 
-use ORM\Mapping\Attributes\PrimaryKey;
+use TrainingUow\ORM\Mapping\Attributes\PrimaryKey;
 
 trait PrimaryKeyTrait
 {
     #[PrimaryKey]
-    private(set) ?int $id = null;
+    private ?int $id = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 }

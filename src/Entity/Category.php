@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Entity;
+namespace TrainingUow\Entity;
 
-use Entity\Trait\DescribableEntityTrait;
-use Entity\Trait\PrimaryKeyTrait;
-use ORM\Mapping\Attributes\Table;
+use TrainingUow\Entity\Trait\DescribableEntityTrait;
+use TrainingUow\Entity\Trait\PrimaryKeyTrait;
+use TrainingUow\ORM\Mapping\Attributes\Table;
 
 #[Table(name: 'category')]
 class Category

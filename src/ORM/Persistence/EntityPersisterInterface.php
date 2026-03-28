@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ORM\Persistence;
+namespace TrainingUow\ORM\Persistence;
 
 interface EntityPersisterInterface
 {

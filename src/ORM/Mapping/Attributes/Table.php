@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ORM\Mapping\Attributes;
+namespace TrainingUow\ORM\Mapping\Attributes;
 
 use Attribute;
 

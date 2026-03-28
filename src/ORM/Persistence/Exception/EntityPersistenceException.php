@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ORM\Persistence\Exception;
+namespace TrainingUow\ORM\Persistence\Exception;
 
 use RuntimeException;
 
