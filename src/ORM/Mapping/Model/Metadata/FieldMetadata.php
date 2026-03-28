@@ -9,7 +9,8 @@ use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
 class FieldMetadata
 {
     public function __construct(
-        public string $name,
+        public string $propertyName,
+        public string $columnName,
         public Type $type,
         public ?int $length = null,
         public bool $nullable = false,

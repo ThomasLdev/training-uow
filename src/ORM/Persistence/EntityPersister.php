@@ -28,7 +28,7 @@ final readonly class EntityPersister implements EntityPersisterInterface
     public function insert(object $entity): void
     {
         $metadata = $this->metadataFactory->createFromEntity($entity);
-
+        $test = '';
         // TODO : implement the insert logic from the metadata
     }
 
@@ -43,10 +43,10 @@ final readonly class EntityPersister implements EntityPersisterInterface
 
         $reflexion = new ReflectionClass($entity);
 
-        if (!$reflexion->hasProperty('id')) {
+        if (!$reflexion->hasProperty($metadata->primaryKey)) {
             throw EntityPersistenceException::failToSetIdOnEntity($metadata->entityFQCN);
         }
 
-        $reflexion->getProperty('id')->setValue($entity, $lastId);
+        $reflexion->getProperty($metadata->primaryKey)->setValue($entity, $lastId);
     }
 }

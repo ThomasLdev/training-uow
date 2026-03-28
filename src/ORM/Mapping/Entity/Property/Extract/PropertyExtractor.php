@@ -22,30 +22,35 @@ final readonly class PropertyExtractor
     public function extract(): EntityAttributes
     {
         foreach($this->reflection->getProperties() as $property) {
-            $primaryKey = $property->getAttributes(PrimaryKey::class);
-
-            if ([] !== $primaryKey) {
-                $this->entityAttributes->primaryKey = $property->getName();
-
-                continue;
-            }
-
+            $this->setPrimaryKey($property);
             $this->extractColumnAttribute($property);
         }
 
         return $this->entityAttributes;
     }
 
+    private function setPrimaryKey(ReflectionProperty $property): void
+    {
+        $primaryKey = $property->getAttributes(PrimaryKey::class)[0] ?? null;
+
+        if (null === $primaryKey) {
+            return;
+        }
+
+        $this->entityAttributes->primaryKey = $property->getName();
+    }
+
     private function extractColumnAttribute(ReflectionProperty $property): void
     {
-        $column = $property->getAttributes(Column::class)[0]->newInstance();
+        $column = $property->getAttributes(Column::class)[0]?->newInstance() ?? null;
 
         if (!$column instanceof Column) {
             return;
         }
 
         $this->entityAttributes->addFieldMetadata(new FieldMetadata(
-            name: $column->name,
+            propertyName : $property->getName(),
+            columnName: $column->name,
             type: $column->type,
             length: $column->length,
             nullable: $column->nullable,

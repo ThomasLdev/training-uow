@@ -13,38 +13,34 @@ final class EntityMetadataFactory
 {
     private static array $cache = [];
 
-    private ReflectionClass $reflection;
-
-    private string $entityFQCN;
-
     public function createFromEntity(object $entity): EntityMetadata
     {
-        $this->reflection = new ReflectionClass($entity);
-        $this->entityFQCN = $entity::class;
+        $reflection = new ReflectionClass($entity);
+        $entityFQCN = $reflection->getName();
 
-        if (array_key_exists($this->entityFQCN, self::$cache)) {
-            return self::$cache[$this->entityFQCN];
+        if (array_key_exists($entityFQCN, self::$cache)) {
+            return self::$cache[$entityFQCN];
         }
 
-        $propertyAttributes = new PropertyExtractor($this->reflection)->extract();
+        $propertyAttributes = new PropertyExtractor($reflection)->extract();
         $metadata = new EntityMetadata(
-            entityFQCN: $this->entityFQCN,
-            tableName: $this->getEntityTableName(),
+            entityFQCN: $entityFQCN,
+            tableName: $this->getEntityTableName($reflection),
             primaryKey: $propertyAttributes->primaryKey,
             fieldsMetadata: $propertyAttributes->fieldsMetadata,
         );
 
-        self::$cache[$this->entityFQCN] = $metadata;
+        self::$cache[$entityFQCN] = $metadata;
 
         return $metadata;
     }
 
-    private function getEntityTableName(): string
+    private function getEntityTableName(ReflectionClass $reflection): string
     {
-        $table = $this->reflection->getAttributes(Table::class)[0]->newInstance();
+        $table = $reflection->getAttributes(Table::class)[0]->newInstance();
 
         if (!$table instanceof Table) {
-            throw ExtractionException::cannotFindTableName($this->entityFQCN);
+            throw ExtractionException::cannotFindTableName($reflection->getName());
         }
 
         return $table->name;

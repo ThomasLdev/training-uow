@@ -23,7 +23,7 @@ $post2 = new Post()
 $database = new PDO('pgsql:host=postgres;dbname=training_uow', 'app', 'app');
 
 $persister = new EntityPersister($database, new EntityMetadataFactory());
-$persister->insert([$post1, $post2]);
+$persister->bulkInsert([$post1, $post2]);
 
-$persistedPost = $database->query("SELECT * FROM post WHERE title = 'new post'");
+$persistedPost = $database->query("SELECT * FROM post WHERE title LIKE '%new post'");
 var_dump($persistedPost->fetchAll());

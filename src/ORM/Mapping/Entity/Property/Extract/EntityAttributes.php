@@ -11,7 +11,7 @@ final class EntityAttributes
 {
     public function __construct(
         public string $primaryKey = '',
-        /* @var list<FieldMetadata> */
+        /* @var array<string, FieldMetadata> */
         public array $fieldsMetadata = [],
     )
     {
@@ -19,10 +19,10 @@ final class EntityAttributes
 
     public function addFieldMetadata(FieldMetadata $fieldMetadata): void
     {
-        if (array_key_exists($fieldMetadata->name, $this->fieldsMetadata)) {
+        if (array_key_exists($fieldMetadata->propertyName, $this->fieldsMetadata)) {
             throw new LogicException('Field metadata already exists.');
         }
 
-        $this->fieldsMetadata[$fieldMetadata->name] = $fieldMetadata;
+        $this->fieldsMetadata[$fieldMetadata->propertyName] = $fieldMetadata;
     }
 }
