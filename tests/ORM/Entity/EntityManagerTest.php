@@ -108,7 +108,7 @@ final class EntityManagerTest extends TestCase
                 $this->isInstanceOf(ManagedEntity::class),
                 $this->callback(function (array $changeSet): bool {
                     return $changeSet['title'] === 'Modified' && !array_key_exists('content', $changeSet);
-                })
+                }),
             );
 
         $this->entityManager->persist($post);

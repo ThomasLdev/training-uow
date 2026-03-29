@@ -9,14 +9,15 @@ use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 
 final class ManagedEntity
 {
+    /**
+     * @param array<string, mixed> $originalData
+     */
     public function __construct(
         private readonly object $entity,
         private EntityState $state,
         private array $originalData,
-        private readonly EntityMetadata $metadata
-    )
-    {
-    }
+        private readonly EntityMetadata $metadata,
+    ) {}
 
     public function getEntityState(): EntityState
     {
@@ -30,11 +31,13 @@ final class ManagedEntity
         return $this;
     }
 
+    /** @return array<string, mixed> */
     public function getOriginalData(): array
     {
         return $this->originalData;
     }
 
+    /** @param array<string, mixed> $originalData */
     public function setOriginalData(array $originalData): self
     {
         $this->originalData = $originalData;

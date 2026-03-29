@@ -6,7 +6,10 @@ namespace TrainingUow\ORM\Entity;
 
 class ChangeSet
 {
-    /** @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $currentValues
+     * @return array<string, mixed>
+     */
     public function get(ManagedEntity $managedEntity, array $currentValues): array
     {
         $changeSet = [];

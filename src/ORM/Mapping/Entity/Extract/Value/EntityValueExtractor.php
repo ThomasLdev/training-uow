@@ -11,6 +11,7 @@ use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 
 class EntityValueExtractor
 {
+    /** @return array<string, mixed> */
     public function extract(object $object, EntityMetadata $metadata): array
     {
         $reflection = new ReflectionClass($object);
@@ -25,7 +26,7 @@ class EntityValueExtractor
             } catch (ReflectionException) {
                 throw EntityValueExtractionException::couldNotExtractValueFromProperty(
                     $object::class,
-                    $fieldMetadata->propertyName
+                    $fieldMetadata->propertyName,
                 );
             }
         }

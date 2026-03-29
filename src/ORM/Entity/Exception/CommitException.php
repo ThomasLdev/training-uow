@@ -12,7 +12,7 @@ class CommitException extends RuntimeException
     public static function managedEntityCannotBePersisted(ManagedEntity $managedEntity): self
     {
         return new self(
-            sprintf('Entity %s cannot be persisted.', $managedEntity->getEntity()::class)
+            sprintf('Entity %s cannot be persisted.', $managedEntity->getEntity()::class),
         );
     }
 }

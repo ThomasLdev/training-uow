@@ -33,7 +33,6 @@ $category2 = new Category()
     ->setDescription('category description 2')
 ;
 
-
 //$database = new PDO('pgsql:host=postgres;dbname=training_uow', 'app', 'app');
 
 $unitOfWork = new UnitOfWork(new EntityMetadataFactory(), new EntityValueExtractor(), new EntityPersister());

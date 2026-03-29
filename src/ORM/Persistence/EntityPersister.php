@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TrainingUow\ORM\Persistence;
 
 use TrainingUow\ORM\Entity\ManagedEntity;
-use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 
 // TODO : wrap everything in a transaction
 final readonly class EntityPersister implements EntityPersisterInterface
@@ -16,6 +15,7 @@ final readonly class EntityPersister implements EntityPersisterInterface
         return 1;
     }
 
+    /** @param array<string, mixed> $changeSet */
     public function update(ManagedEntity $managedEntity, array $changeSet): void
     {
         // TODO: Implement update() method. UPDATE TABLE SET $columns = $VALUES WHERE $primaryKey = $primaryKeyValue

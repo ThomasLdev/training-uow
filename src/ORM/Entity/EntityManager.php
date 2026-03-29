@@ -8,12 +8,7 @@ use ReflectionException;
 
 class EntityManager
 {
-    private UnitOfWork $unitOfWork;
-
-    public function __construct(UnitOfWork $unitOfWork)
-    {
-        $this->unitOfWork = $unitOfWork;
-    }
+    public function __construct(private readonly UnitOfWork $unitOfWork) {}
 
     /**
      * @throws ReflectionException

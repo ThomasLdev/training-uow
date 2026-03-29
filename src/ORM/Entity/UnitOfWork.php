@@ -11,11 +11,9 @@ use TrainingUow\ORM\Mapping\Entity\Extract\Value\EntityValueExtractor;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
 use TrainingUow\ORM\Persistence\EntityPersisterInterface;
 
-use function spl_object_id;
-
 final class UnitOfWork
 {
-    /** @var list<int, ManagedEntity> $managedEntities */
+    /** @var array<int, ManagedEntity> */
     private array $managedEntities = [];
 
     /** @var array<class-string, array<int|string, object>> $identityMapping */
@@ -24,17 +22,15 @@ final class UnitOfWork
     public function __construct(
         private readonly EntityMetadataFactory $metadataFactory,
         private readonly EntityValueExtractor $entityValueExtractor,
-        private readonly EntityPersisterInterface $persister
-    )
-    {
-    }
+        private readonly EntityPersisterInterface $persister,
+    ) {}
 
     /**
      * @throws ReflectionException
      */
     public function persist(object $entity): void
     {
-        $managedEntity = $this->managedEntities[spl_object_id($entity)] ?? null;
+        $managedEntity = $this->managedEntities[\spl_object_id($entity)] ?? null;
 
         if (null === $managedEntity) {
             $this->createManagedEntity($entity);
@@ -49,15 +45,17 @@ final class UnitOfWork
 
     public function remove(object $entity): void
     {
-        $managedEntity = $this->managedEntities[spl_object_id($entity)] ?? null;
+        $managedEntity = $this->managedEntities[\spl_object_id($entity)] ?? null;
 
         if (null === $managedEntity) {
             return;
         }
 
         switch ($managedEntity->getEntityState()) {
-            case EntityState::New: unset($this->managedEntities[spl_object_id($entity)]); break;
-            case EntityState::Managed: $managedEntity->setEntityState(EntityState::Removed); break;
+            case EntityState::New: unset($this->managedEntities[\spl_object_id($entity)]);
+                break;
+            case EntityState::Managed: $managedEntity->setEntityState(EntityState::Removed);
+                break;
         }
     }
 
@@ -68,9 +66,12 @@ final class UnitOfWork
     {
         foreach ($this->managedEntities as $managedEntity) {
             switch ($managedEntity->getEntityState()) {
-                case EntityState::New: $this->handleCommitNewState($managedEntity); break;
-                case EntityState::Managed: $this->handleCommitManagedState($managedEntity); break;
-                case EntityState::Removed: $this->handleCommitRemovedState($managedEntity); break;
+                case EntityState::New: $this->handleCommitNewState($managedEntity);
+                    break;
+                case EntityState::Managed: $this->handleCommitManagedState($managedEntity);
+                    break;
+                case EntityState::Removed: $this->handleCommitRemovedState($managedEntity);
+                    break;
             }
         }
     }
@@ -82,7 +83,7 @@ final class UnitOfWork
     {
         $metadata = $this->metadataFactory->fromClassName($entity::class);
 
-        $this->managedEntities[spl_object_id($entity)] = new ManagedEntity(
+        $this->managedEntities[\spl_object_id($entity)] = new ManagedEntity(
             entity: $entity,
             state: EntityState::New,
             originalData: $this->entityValueExtractor->extract($entity, $metadata),
@@ -106,7 +107,7 @@ final class UnitOfWork
         ;
 
         $managedEntity->setOriginalData(
-            $this->entityValueExtractor->extract($entity, $managedEntity->getMetadata())
+            $this->entityValueExtractor->extract($entity, $managedEntity->getMetadata()),
         );
 
         $this->identityMapping[$managedEntity->getEntity()::class][$primaryKeyValue] = $entity;
@@ -116,7 +117,7 @@ final class UnitOfWork
     {
         $changeSet = new ChangeSet()->get(
             $managedEntity,
-            $this->entityValueExtractor->extract($managedEntity->getEntity(), $managedEntity->getMetadata())
+            $this->entityValueExtractor->extract($managedEntity->getEntity(), $managedEntity->getMetadata()),
         );
 
         if ([] === $changeSet) {
@@ -134,13 +135,14 @@ final class UnitOfWork
         $this->persister->delete($managedEntity);
 
         $entity = $managedEntity->getEntity();
+        /** @var int|string $primaryKeyValue */
         $primaryKeyValue = new ReflectionClass($entity)
             ->getProperty($managedEntity->getMetadata()->primaryKey)
             ->getValue($entity)
         ;
 
         unset(
-            $this->managedEntities[spl_object_id($managedEntity->getEntity())],
+            $this->managedEntities[\spl_object_id($managedEntity->getEntity())],
             $this->identityMapping[$entity::class][$primaryKeyValue],
         );
     }
