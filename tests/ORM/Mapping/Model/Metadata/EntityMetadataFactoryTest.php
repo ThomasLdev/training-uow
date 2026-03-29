@@ -9,22 +9,25 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use TrainingUow\Entity\Category;
+use TrainingUow\Entity\Post;
+use TrainingUow\ORM\Mapping\Attributes\Column;
 use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
-use TrainingUow\ORM\Mapping\Entity\Property\Extract\EntityAttributes;
-use TrainingUow\ORM\Mapping\Entity\Property\Extract\Exception\ExtractionException;
-use TrainingUow\ORM\Mapping\Entity\Property\Extract\PropertyExtractor;
+use TrainingUow\ORM\Mapping\Attributes\PrimaryKey;
+use TrainingUow\ORM\Mapping\Attributes\Table;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\EntityAttributeExtractor;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\EntityAttributes;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
+use TrainingUow\ORM\Mapping\Model\Metadata\Exception\EntityMetadataException;
 use TrainingUow\ORM\Mapping\Model\Metadata\FieldMetadata;
-use TrainingUow\Tests\Builder\CategoryBuilder;
-use TrainingUow\Tests\Builder\PostBuilder;
 
 #[CoversClass(EntityMetadataFactory::class)]
 #[CoversClass(EntityMetadata::class)]
 #[CoversClass(FieldMetadata::class)]
-#[CoversClass(PropertyExtractor::class)]
+#[CoversClass(EntityAttributeExtractor::class)]
 #[CoversClass(EntityAttributes::class)]
-#[CoversClass(ExtractionException::class)]
+#[CoversClass(EntityMetadataException::class)]
 final class EntityMetadataFactoryTest extends TestCase
 {
     private EntityMetadataFactory $factory;
@@ -39,27 +42,27 @@ final class EntityMetadataFactoryTest extends TestCase
 
     #[Test]
     #[DataProvider('entityProvider')]
-    public function it_extracts_table_name(object $entity, string $expectedTableName): void
+    public function it_extracts_table_name(string $className, string $expectedTableName): void
     {
-        $metadata = $this->factory->createFromEntity($entity);
+        $metadata = $this->factory->fromClassName($className);
 
         self::assertSame($expectedTableName, $metadata->tableName);
     }
 
     #[Test]
-    #[DataProvider('entityProvider')]
-    public function it_extracts_entity_fqcn(object $entity, string $expectedTableName): void
+    #[DataProvider('classNameProvider')]
+    public function it_extracts_entity_fqcn(string $className): void
     {
-        $metadata = $this->factory->createFromEntity($entity);
+        $metadata = $this->factory->fromClassName($className);
 
-        self::assertSame($entity::class, $metadata->entityFQCN);
+        self::assertSame($className, $metadata->entityFQCN);
     }
 
     #[Test]
-    #[DataProvider('entityProvider')]
-    public function it_extracts_primary_key(object $entity, string $expectedTableName): void
+    #[DataProvider('classNameProvider')]
+    public function it_extracts_primary_key(string $className): void
     {
-        $metadata = $this->factory->createFromEntity($entity);
+        $metadata = $this->factory->fromClassName($className);
 
         self::assertSame('id', $metadata->primaryKey);
     }
@@ -67,14 +70,14 @@ final class EntityMetadataFactoryTest extends TestCase
     #[Test]
     #[DataProvider('entityWithFieldsProvider')]
     public function it_extracts_field_metadata(
-        object $entity,
+        string $className,
         string $propertyName,
         string $expectedColumnName,
         Type $expectedType,
         ?int $expectedLength,
         bool $expectedNullable,
     ): void {
-        $metadata = $this->factory->createFromEntity($entity);
+        $metadata = $this->factory->fromClassName($className);
 
         self::assertArrayHasKey($propertyName, $metadata->fieldsMetadata);
 
@@ -89,11 +92,8 @@ final class EntityMetadataFactoryTest extends TestCase
     #[Test]
     public function it_caches_metadata_for_same_entity_class(): void
     {
-        $post1 = PostBuilder::aPost()->withTitle('First')->build();
-        $post2 = PostBuilder::aPost()->withTitle('Second')->build();
-
-        $metadata1 = $this->factory->createFromEntity($post1);
-        $metadata2 = $this->factory->createFromEntity($post2);
+        $metadata1 = $this->factory->fromClassName(Post::class);
+        $metadata2 = $this->factory->fromClassName(Post::class);
 
         self::assertSame($metadata1, $metadata2);
     }
@@ -101,11 +101,8 @@ final class EntityMetadataFactoryTest extends TestCase
     #[Test]
     public function it_returns_different_metadata_for_different_entity_classes(): void
     {
-        $post = PostBuilder::aPost()->build();
-        $category = CategoryBuilder::aCategory()->build();
-
-        $postMetadata = $this->factory->createFromEntity($post);
-        $categoryMetadata = $this->factory->createFromEntity($category);
+        $postMetadata = $this->factory->fromClassName(Post::class);
+        $categoryMetadata = $this->factory->fromClassName(Category::class);
 
         self::assertNotSame($postMetadata, $categoryMetadata);
         self::assertSame('post', $postMetadata->tableName);
@@ -117,36 +114,61 @@ final class EntityMetadataFactoryTest extends TestCase
     {
         $entity = new class {};
 
-        $this->expectException(ExtractionException::class);
+        $this->expectException(EntityMetadataException::class);
+        $this->expectExceptionMessage('No table name specified');
 
-        $this->factory->createFromEntity($entity);
+        $this->factory->fromClassName($entity::class);
+    }
+
+    #[Test]
+    public function it_throws_when_entity_has_no_primary_key(): void
+    {
+        $entity = new #[Table('test')] class {
+            #[Column(name: 'name', type: Type::String, length: 255)]
+            public string $name = '';
+        };
+
+        $this->expectException(EntityMetadataException::class);
+        $this->expectExceptionMessage('No primary key specified');
+
+        $this->factory->fromClassName($entity::class);
+    }
+
+    #[Test]
+    public function it_throws_when_entity_has_no_mapped_fields(): void
+    {
+        $entity = new #[Table('test')] class {
+            #[PrimaryKey]
+            public int $id = 0;
+        };
+
+        $this->expectException(EntityMetadataException::class);
+        $this->expectExceptionMessage('No mapped fields found');
+
+        $this->factory->fromClassName($entity::class);
+    }
+
+    public static function classNameProvider(): iterable
+    {
+        yield 'post entity' => [Post::class];
+        yield 'category entity' => [Category::class];
     }
 
     public static function entityProvider(): iterable
     {
-        yield 'post entity' => [
-            PostBuilder::aPost()->build(),
-            'post',
-        ];
-
-        yield 'category entity' => [
-            CategoryBuilder::aCategory()->build(),
-            'category',
-        ];
+        yield 'post entity' => [Post::class, 'post'];
+        yield 'category entity' => [Category::class, 'category'];
     }
 
     public static function entityWithFieldsProvider(): iterable
     {
-        $post = PostBuilder::aPost()->build();
-        $category = CategoryBuilder::aCategory()->build();
+        yield 'post.id' => [Post::class, 'id', 'id', Type::Integer, null, false];
+        yield 'post.title' => [Post::class, 'title', 'title', Type::String, 255, false];
+        yield 'post.description' => [Post::class, 'description', 'description', Type::Text, null, false];
+        yield 'post.content' => [Post::class, 'content', 'content', Type::Text, null, false];
 
-        yield 'post.id' => [$post, 'id', 'id', Type::Integer, null, false];
-        yield 'post.title' => [$post, 'title', 'title', Type::String, 255, false];
-        yield 'post.description' => [$post, 'description', 'description', Type::Text, null, false];
-        yield 'post.content' => [$post, 'content', 'content', Type::Text, null, false];
-
-        yield 'category.id' => [$category, 'id', 'id', Type::Integer, null, false];
-        yield 'category.title' => [$category, 'title', 'title', Type::String, 255, false];
-        yield 'category.description' => [$category, 'description', 'description', Type::Text, null, false];
+        yield 'category.id' => [Category::class, 'id', 'id', Type::Integer, null, false];
+        yield 'category.title' => [Category::class, 'title', 'title', Type::String, 255, false];
+        yield 'category.description' => [Category::class, 'description', 'description', Type::Text, null, false];
     }
 }

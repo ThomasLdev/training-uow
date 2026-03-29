@@ -61,15 +61,15 @@ function ci(): void
 {
     tests();
     phpstan();
-    csCheck();
     rector();
+    csCheck();
 }
 
 #[AsTask(description: 'Run all quality checks with fixes')]
 function ciFix(): void
 {
     phpstan();
-    csCheckFix();
     rectorFix();
+    csCheckFix();
     tests();
 }

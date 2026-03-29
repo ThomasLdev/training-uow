@@ -18,6 +18,11 @@ class EntityPersistenceException extends RuntimeException
         return new self(sprintf('Failed to set id on entity "%s".', $entityName));
     }
 
+    public static function failedToGetClassReflection(string $className): self
+    {
+        return new self(sprintf('Failed to get reflection for class "%s".', $className));
+    }
+
     public static function insertFailed(string $table): self
     {
         return new self(sprintf('Failed to insert into table "%s".', $table));

@@ -5,46 +5,57 @@ declare(strict_types=1);
 namespace TrainingUow\ORM\Mapping\Model\Metadata;
 
 use ReflectionClass;
-use TrainingUow\ORM\Mapping\Attributes\Table;
-use TrainingUow\ORM\Mapping\Entity\Property\Extract\Exception\ExtractionException;
-use TrainingUow\ORM\Mapping\Entity\Property\Extract\PropertyExtractor;
+use ReflectionException;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\EntityAttributeExtractor;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\EntityAttributes;
+use TrainingUow\ORM\Mapping\Model\Metadata\Exception\EntityMetadataException;
 
 final class EntityMetadataFactory
 {
     /** @var array<string, EntityMetadata> */
     private static array $cache = [];
 
-    public function createFromEntity(object $entity): EntityMetadata
+    /**
+     * @param class-string $className
+     *
+     * @throws ReflectionException
+     */
+    public function fromClassName(string $className): EntityMetadata
     {
-        $reflection = new ReflectionClass($entity);
-        $entityFQCN = $reflection->getName();
-
-        if (array_key_exists($entityFQCN, self::$cache)) {
-            return self::$cache[$entityFQCN];
+        if (array_key_exists($className, self::$cache)) {
+            return self::$cache[$className];
         }
 
-        $propertyAttributes = new PropertyExtractor($reflection)->extract();
+        $reflection = new ReflectionClass($className);
+
+        $propertyAttributes = new EntityAttributeExtractor($reflection)->extract();
+
+        $this->validateMetadata($propertyAttributes, $className);
+
         $metadata = new EntityMetadata(
-            entityFQCN: $entityFQCN,
-            tableName: $this->getEntityTableName($reflection),
+            entityFQCN: $className,
+            tableName: $propertyAttributes->tableName,
             primaryKey: $propertyAttributes->primaryKey,
             fieldsMetadata: $propertyAttributes->fieldsMetadata,
         );
 
-        self::$cache[$entityFQCN] = $metadata;
+        self::$cache[$className] = $metadata;
 
         return $metadata;
     }
 
-    /** @param ReflectionClass<object> $reflection */
-    private function getEntityTableName(ReflectionClass $reflection): string
+    private function validateMetadata(EntityAttributes $entityAttributes, string $className): void
     {
-        $table = $reflection->getAttributes(Table::class)[0] ?? null;
-
-        if (null === $table) {
-            throw ExtractionException::cannotFindTableName($reflection->getName());
+        if ('' === $entityAttributes->tableName) {
+            throw EntityMetadataException::tableNameNotSpecified($className);
         }
 
-        return $table->newInstance()->name;
+        if ('' === $entityAttributes->primaryKey) {
+            throw EntityMetadataException::primaryKeyNotSpecified($className);
+        }
+
+        if ([] === $entityAttributes->fieldsMetadata) {
+            throw EntityMetadataException::noMappedFieldsFound($className);
+        }
     }
 }
