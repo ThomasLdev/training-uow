@@ -4,38 +4,25 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Persistence;
 
-use ReflectionException;
-use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
-use TrainingUow\ORM\Persistence\Exception\EntityPersistenceException;
+use TrainingUow\ORM\Entity\ManagedEntity;
+use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 
+// TODO : wrap everything in a transaction
 final readonly class EntityPersister implements EntityPersisterInterface
 {
-    private EntityMetadataFactory $metadataFactory;
-
-    public function __construct()
+    public function insert(ManagedEntity $managedEntity): int
     {
-        $this->metadataFactory = new EntityMetadataFactory();
+        // TODO : implement the insert logic from the metadata INSERT INTO $tableName VALUES($fields)
+        return 1;
     }
 
-    // TODO : real bulk insert with a single SQL query
-    /** @inheritDoc */
-    public function bulkInsert(array $entities): void
+    public function update(ManagedEntity $managedEntity, array $changeSet): void
     {
-        foreach ($entities as $entity) {
-            $this->insert($entity);
-        }
+        // TODO: Implement update() method. UPDATE TABLE SET $columns = $VALUES WHERE $primaryKey = $primaryKeyValue
     }
 
-    public function insert(object $entity): void
+    public function delete(ManagedEntity $managedEntity): void
     {
-        $className = $entity::class;
-
-        try {
-            $classMetadata = $this->metadataFactory->fromClassName($className);
-        } catch (ReflectionException) {
-            throw EntityPersistenceException::failedToGetClassReflection($className);
-        }
-
-        // TODO : implement the insert logic from the metadata
+        // TODO: Implement delete() method. DELETE FROM $tableName WHERE $primaryKey = $primaryKeyValue
     }
 }

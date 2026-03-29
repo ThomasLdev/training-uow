@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Persistence;
 
+use TrainingUow\ORM\Entity\ManagedEntity;
+
 interface EntityPersisterInterface
 {
-    public function insert(object $entity): void;
-
-    /** @param array<array-key, object> $entities */
-    public function bulkInsert(array $entities): void;
+    public function insert(ManagedEntity $managedEntity): int;
+    public function update(ManagedEntity $managedEntity, array $changeSet): void;
+    public function delete(ManagedEntity $managedEntity): void;
 }
