@@ -35,13 +35,6 @@ function csCheck(): void
     run('vendor/bin/php-cs-fixer fix --dry-run');
 }
 
-#[AsTask(name: 'cs-check-fix', description: 'Check code style with PHP CS Fixer with Fix')]
-function csCheckFix(): void
-{
-    io()->title('Checking PHP CS Fixer');
-    run('vendor/bin/php-cs-fixer fix');
-}
-
 #[AsTask(description: 'Run Rector dry-run')]
 function rector(): void
 {
@@ -70,6 +63,6 @@ function ciFix(): void
 {
     phpstan();
     rectorFix();
-    csCheckFix();
+    csFix();
     tests();
 }
