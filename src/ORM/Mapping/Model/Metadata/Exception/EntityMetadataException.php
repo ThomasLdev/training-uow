@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace TrainingUow\ORM\Mapping\Model\Metadata\Exception;
 
 use RuntimeException;
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
+#[Exclude]
 class EntityMetadataException extends RuntimeException
 {
     public static function tableNameNotSpecified(string $entityName): self

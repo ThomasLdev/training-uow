@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use TrainingUow\Entity\Category;
 use TrainingUow\Entity\Post;
-use TrainingUow\ORM\Entity\UnitOfWork;
-use TrainingUow\ORM\Mapping\Entity\Extract\Value\EntityValueExtractor;
-use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
-use TrainingUow\ORM\Persistence\EntityPersister;
+use TrainingUow\ORM\Entity\EntityManager;
+
+/** @var ContainerBuilder $container */
+$container = require __DIR__ . '/../config/container.php';
+
+$entityManager = $container->get(EntityManager::class);
 
 $post1 = new Post()
     ->setContent('this is a new post 1 !')
@@ -33,11 +34,9 @@ $category2 = new Category()
     ->setDescription('category description 2')
 ;
 
-//$database = new PDO('pgsql:host=postgres;dbname=training_uow', 'app', 'app');
+$entityManager->persist($post1);
+$entityManager->persist($post2);
+$entityManager->persist($category1);
+$entityManager->persist($category2);
 
-$unitOfWork = new UnitOfWork(new EntityMetadataFactory(), new EntityValueExtractor(), new EntityPersister());
-//$persister->bulkInsert([$post1, $post2, $category1, $category2]);
-$unitOfWork->persist($post1);
-
-//$persistedPost = $database->query("SELECT * FROM post WHERE title LIKE '%new post'");
-//var_dump($persistedPost->fetchAll());
+$entityManager->flush();

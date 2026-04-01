@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
 use TrainingUow\ORM\Mapping\Entity\Extract\Value\EntityValueExtractor;
 use TrainingUow\ORM\Mapping\Entity\Extract\Value\Exception\EntityValueExtractionException;
@@ -26,8 +27,10 @@ final class EntityValueExtractorTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->extractor = new EntityValueExtractor();
-        $this->metadataFactory = new EntityMetadataFactory();
+        /** @var ContainerBuilder $container */
+        $container = require __DIR__ . '/../../../../../../config/container.php';
+        $this->extractor = $container->get(EntityValueExtractor::class);
+        $this->metadataFactory = $container->get(EntityMetadataFactory::class);
 
         $reflection = new ReflectionClass(EntityMetadataFactory::class);
         $reflection->setStaticPropertyValue('cache', []);

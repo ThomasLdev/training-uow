@@ -6,38 +6,45 @@ namespace TrainingUow\ORM\Mapping\Entity\Extract\Attribute;
 
 use ReflectionClass;
 use ReflectionProperty;
-use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\Class\ClassAttributeVisitorRegistry;
-use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\Property\PropertyAttributeVisitorRegistry;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\Class\ClassAttributeVisitorInterface;
+use TrainingUow\ORM\Mapping\Entity\Extract\Attribute\Property\PropertyAttributeVisitorInterface;
 
 final readonly class EntityAttributeExtractor
 {
-    /** @param ReflectionClass<object> $reflectionClass */
+    /**
+     * @param iterable<ClassAttributeVisitorInterface> $classAttributeVisitors
+     * @param iterable<PropertyAttributeVisitorInterface> $propertyAttributeVisitors
+     */
     public function __construct(
-        private ReflectionClass $reflectionClass,
-        private PropertyAttributeVisitorRegistry $propertyAttributeVisitors = new PropertyAttributeVisitorRegistry(),
-        private ClassAttributeVisitorRegistry $classAttributeVisitors = new ClassAttributeVisitorRegistry(),
+        #[AutowireIterator(ClassAttributeVisitorInterface::class)]
+        private iterable $classAttributeVisitors,
+        #[AutowireIterator(PropertyAttributeVisitorInterface::class)]
+        private iterable $propertyAttributeVisitors,
     ) {}
 
-    public function extract(): EntityAttributes
+    /** @param ReflectionClass<object> $reflectionClass */
+    public function extract(ReflectionClass $reflectionClass): EntityAttributes
     {
         $entityAttributes = new EntityAttributes();
 
-        $this->visitClassAttributes($entityAttributes);
+        $this->visitClassAttributes($reflectionClass, $entityAttributes);
 
-        foreach ($this->reflectionClass->getProperties() as $property) {
+        foreach ($reflectionClass->getProperties() as $property) {
             $this->visitPropertyAttributes($property, $entityAttributes);
         }
 
         return $entityAttributes;
     }
 
-    private function visitClassAttributes(EntityAttributes $attributes): void
+    /** @param ReflectionClass<object> $reflectionClass */
+    private function visitClassAttributes(ReflectionClass $reflectionClass, EntityAttributes $attributes): void
     {
-        $classAttributes = $this->reflectionClass->getAttributes();
+        $classAttributes = $reflectionClass->getAttributes();
 
-        foreach ($this->classAttributeVisitors->get() as $visitor) {
+        foreach ($this->classAttributeVisitors as $visitor) {
             if ($visitor->supports($classAttributes)) {
-                $visitor->visit($this->reflectionClass, $attributes);
+                $visitor->visit($reflectionClass, $attributes);
             }
         }
     }
@@ -46,7 +53,7 @@ final readonly class EntityAttributeExtractor
     {
         $propertyAttributes = $property->getAttributes();
 
-        foreach ($this->propertyAttributeVisitors->get() as $visitor) {
+        foreach ($this->propertyAttributeVisitors as $visitor) {
             if ($visitor->supports($propertyAttributes)) {
                 $visitor->visit($property, $attributes);
             }

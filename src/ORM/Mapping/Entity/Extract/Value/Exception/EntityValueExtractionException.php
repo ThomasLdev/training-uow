@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace TrainingUow\ORM\Mapping\Entity\Extract\Value\Exception;
 
 use RuntimeException;
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
+#[Exclude]
 class EntityValueExtractionException extends RuntimeException
 {
     public static function couldNotExtractValueFromProperty(string $entityClass, string $propertyName): self

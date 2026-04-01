@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Mapping\Model\Metadata;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 use TrainingUow\ORM\Mapping\Attributes\Enum\Type;
 
+#[Exclude]
 class FieldMetadata
 {
     public function __construct(

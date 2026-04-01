@@ -15,6 +15,10 @@ final class EntityMetadataFactory
     /** @var array<string, EntityMetadata> */
     private static array $cache = [];
 
+    public function __construct(
+        private readonly EntityAttributeExtractor $attributeExtractor,
+    ) {}
+
     /**
      * @param class-string $className
      *
@@ -28,7 +32,7 @@ final class EntityMetadataFactory
 
         $reflection = new ReflectionClass($className);
 
-        $propertyAttributes = new EntityAttributeExtractor($reflection)->extract();
+        $propertyAttributes = $this->attributeExtractor->extract($reflection);
 
         $this->validateMetadata($propertyAttributes, $className);
 

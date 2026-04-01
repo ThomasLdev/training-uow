@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use TrainingUow\ORM\Entity\ChangeSet;
 use TrainingUow\ORM\Entity\EntityManager;
 use TrainingUow\ORM\Entity\ManagedEntity;
@@ -29,14 +30,19 @@ final class EntityManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $metadataFactory = new EntityMetadataFactory();
+        /** @var ContainerBuilder $container */
+        $container = require __DIR__ . '/../../../config/container.php';
 
         $reflection = new ReflectionClass(EntityMetadataFactory::class);
         $reflection->setStaticPropertyValue('cache', []);
 
         $this->persister = $this->createMock(EntityPersisterInterface::class);
 
-        $unitOfWork = new UnitOfWork($metadataFactory, new EntityValueExtractor(), $this->persister);
+        $unitOfWork = new UnitOfWork(
+            $container->get(EntityMetadataFactory::class),
+            $container->get(EntityValueExtractor::class),
+            $this->persister,
+        );
         $this->entityManager = new EntityManager($unitOfWork);
     }
 

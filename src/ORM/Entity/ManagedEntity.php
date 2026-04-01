@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Entity;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 use TrainingUow\ORM\Entity\Enum\EntityState;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadata;
 
+#[Exclude]
 final class ManagedEntity
 {
     /**

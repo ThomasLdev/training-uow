@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use TrainingUow\Entity\Category;
 use TrainingUow\Entity\Post;
 use TrainingUow\ORM\Mapping\Attributes\Column;
@@ -34,7 +35,9 @@ final class EntityMetadataFactoryTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->factory = new EntityMetadataFactory();
+        /** @var ContainerBuilder $container */
+        $container = require __DIR__ . '/../../../../../config/container.php';
+        $this->factory = $container->get(EntityMetadataFactory::class);
 
         $reflection = new ReflectionClass(EntityMetadataFactory::class);
         $reflection->setStaticPropertyValue('cache', []);

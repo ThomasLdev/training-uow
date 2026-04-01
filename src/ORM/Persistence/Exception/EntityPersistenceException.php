@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace TrainingUow\ORM\Persistence\Exception;
 
 use RuntimeException;
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
+#[Exclude]
 class EntityPersistenceException extends RuntimeException
 {
     public static function failToGetLastIdFromSequence(string $sequence): self

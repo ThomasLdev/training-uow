@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Entity;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
+
+#[Exclude]
 class ChangeSet
 {
     /**

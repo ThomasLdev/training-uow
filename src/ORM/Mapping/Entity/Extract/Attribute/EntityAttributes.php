@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Mapping\Entity\Extract\Attribute;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
 use TrainingUow\ORM\Mapping\Model\Metadata\FieldMetadata;
 
+#[Exclude]
 final class EntityAttributes
 {
     public function __construct(

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Mapping\Model\Metadata;
 
+use Symfony\Component\DependencyInjection\Attribute\Exclude;
+
+#[Exclude]
 final readonly class EntityMetadata
 {
     public function __construct(

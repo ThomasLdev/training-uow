@@ -6,9 +6,9 @@ namespace TrainingUow\ORM\Entity;
 
 use ReflectionException;
 
-class EntityManager
+readonly class EntityManager
 {
-    public function __construct(private readonly UnitOfWork $unitOfWork) {}
+    public function __construct(private UnitOfWork $unitOfWork) {}
 
     /**
      * @throws ReflectionException
