@@ -56,4 +56,19 @@ final class ManagedEntity
     {
         return $this->metadata;
     }
+
+    /**
+     * @param array<string, mixed> $currentValues keyed by propertyName
+     * @return array<string, mixed> keyed by columnName
+     */
+    public function getColumnValuesPairs(array $currentValues): array
+    {
+        $map = [];
+
+        foreach ($this->metadata->fieldsMetadata as $field) {
+            $map[$field->columnName] = $currentValues[$field->propertyName];
+        }
+
+        return $map;
+    }
 }

@@ -4,19 +4,38 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Persistence;
 
+use TrainingUow\ORM\Database\PdoWrapper;
+use TrainingUow\ORM\Entity\Enum\EntityState;
 use TrainingUow\ORM\Entity\ManagedEntity;
+use TrainingUow\ORM\Entity\Model\ChangeSet;
+use TrainingUow\ORM\Persistence\Exception\EntityPersistenceException;
 
-// TODO : wrap everything in a transaction
 final readonly class EntityPersister implements EntityPersisterInterface
 {
-    public function insert(ManagedEntity $managedEntity): int
+    public function __construct(private PdoWrapper $pdoWrapper) {}
+
+    public function insert(ManagedEntity $managedEntity, ChangeSet $changeSet): string
     {
-        // TODO : implement the insert logic from the metadata INSERT INTO $tableName VALUES($fields)
-        return 1;
+        if (EntityState::New !== $managedEntity->getEntityState()) {
+            throw EntityPersistenceException::cannotInsertNotNewEntity(
+                $managedEntity->getEntity()::class,
+                $managedEntity->getEntityState(),
+            );
+        }
+
+        $metadata = $managedEntity->getMetadata();
+
+        $sql = <<<SQL
+            INSERT INTO {$metadata->tableName} ({$changeSet->getColumns()})
+            VALUES ({$changeSet->getPlaceholders()})
+        SQL;
+
+        $this->pdoWrapper->getPdo()->prepare($sql)->execute($changeSet->getValues());
+
+        return $this->pdoWrapper->getLastInsertId($metadata);
     }
 
-    /** @param array<string, mixed> $changeSet */
-    public function update(ManagedEntity $managedEntity, array $changeSet): void
+    public function update(ManagedEntity $managedEntity, ChangeSet $changeSet): void
     {
         // TODO: Implement update() method. UPDATE TABLE SET $columns = $VALUES WHERE $primaryKey = $primaryKeyValue
     }

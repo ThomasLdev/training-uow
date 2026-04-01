@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace TrainingUow\ORM\Entity;
 
+use Exception;
 use ReflectionClass;
 use ReflectionException;
 use TrainingUow\ORM\Entity\Enum\EntityState;
+use TrainingUow\ORM\Entity\Model\ChangeSet;
+use TrainingUow\ORM\Entity\Model\ChangeSetFactory;
 use TrainingUow\ORM\Mapping\Entity\Extract\Value\EntityValueExtractor;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
 use TrainingUow\ORM\Persistence\EntityPersisterInterface;
@@ -23,6 +26,7 @@ final class UnitOfWork
         private readonly EntityMetadataFactory $metadataFactory,
         private readonly EntityValueExtractor $entityValueExtractor,
         private readonly EntityPersisterInterface $persister,
+        private readonly ChangeSetFactory $changeSetFactory,
     ) {}
 
     /**
@@ -93,10 +97,20 @@ final class UnitOfWork
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     private function handleCommitNewState(ManagedEntity $managedEntity): void
     {
-        $primaryKeyValue = $this->persister->insert($managedEntity);
+        $metadata = $managedEntity->getMetadata();
+        $primaryKeyField = $metadata->fieldsMetadata[$metadata->primaryKey];
+
+        $primaryKeyValue = $primaryKeyField->type->convertPrimaryKeyToPHPValue(
+            $this->persister->insert(
+                managedEntity: $managedEntity,
+                changeSet: $this->computeChangeSet($managedEntity),
+            ),
+        );
+
         $entity = $managedEntity->getEntity();
 
         $managedEntity->setEntityState(EntityState::Managed);
@@ -115,12 +129,9 @@ final class UnitOfWork
 
     private function handleCommitManagedState(ManagedEntity $managedEntity): void
     {
-        $changeSet = new ChangeSet()->get(
-            $managedEntity,
-            $this->entityValueExtractor->extract($managedEntity->getEntity(), $managedEntity->getMetadata()),
-        );
+        $changeSet = $this->computeChangeSet($managedEntity);
 
-        if ([] === $changeSet) {
+        if ([] === $changeSet->getValues()) {
             return;
         }
 
@@ -144,6 +155,14 @@ final class UnitOfWork
         unset(
             $this->managedEntities[\spl_object_id($managedEntity->getEntity())],
             $this->identityMapping[$entity::class][$primaryKeyValue],
+        );
+    }
+
+    private function computeChangeSet(ManagedEntity $managedEntity): ChangeSet
+    {
+        return $this->changeSetFactory->get(
+            $managedEntity,
+            $this->entityValueExtractor->extract($managedEntity->getEntity(), $managedEntity->getMetadata()),
         );
     }
 }

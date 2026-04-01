@@ -10,9 +10,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use TrainingUow\ORM\Entity\ChangeSet;
 use TrainingUow\ORM\Entity\EntityManager;
 use TrainingUow\ORM\Entity\ManagedEntity;
+use TrainingUow\ORM\Entity\Model\ChangeSet;
+use TrainingUow\ORM\Entity\Model\ChangeSetFactory;
 use TrainingUow\ORM\Entity\UnitOfWork;
 use TrainingUow\ORM\Mapping\Entity\Extract\Value\EntityValueExtractor;
 use TrainingUow\ORM\Mapping\Model\Metadata\EntityMetadataFactory;
@@ -22,7 +23,7 @@ use TrainingUow\Tests\Builder\PostBuilder;
 #[CoversClass(EntityManager::class)]
 #[CoversClass(UnitOfWork::class)]
 #[CoversClass(ManagedEntity::class)]
-#[CoversClass(ChangeSet::class)]
+#[CoversClass(ChangeSetFactory::class)]
 final class EntityManagerTest extends TestCase
 {
     private EntityManager $entityManager;
@@ -42,6 +43,7 @@ final class EntityManagerTest extends TestCase
             $container->get(EntityMetadataFactory::class),
             $container->get(EntityValueExtractor::class),
             $this->persister,
+            $container->get(ChangeSetFactory::class),
         );
         $this->entityManager = new EntityManager($unitOfWork);
     }
@@ -51,7 +53,7 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->withTitle('Hello')->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
 
         $this->entityManager->persist($post);
         $this->entityManager->flush();
@@ -67,7 +69,7 @@ final class EntityManagerTest extends TestCase
 
         $this->persister->expects($this->exactly(2))
             ->method('insert')
-            ->willReturnOnConsecutiveCalls(1, 2);
+            ->willReturnOnConsecutiveCalls('1', '2');
 
         $this->entityManager->persist($post1);
         $this->entityManager->persist($post2);
@@ -82,7 +84,7 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
 
         $this->entityManager->persist($post);
         $this->entityManager->persist($post);
@@ -94,7 +96,7 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->withTitle('Stable')->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
         $this->persister->expects($this->never())->method('update');
 
         $this->entityManager->persist($post);
@@ -107,13 +109,13 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->withTitle('Original')->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
         $this->persister->expects($this->once())
             ->method('update')
             ->with(
                 $this->isInstanceOf(ManagedEntity::class),
-                $this->callback(function (array $changeSet): bool {
-                    return $changeSet['title'] === 'Modified' && !array_key_exists('content', $changeSet);
+                $this->callback(function (ChangeSet $changeSet): bool {
+                    return $changeSet->getValues()['title'] === 'Modified' && !array_key_exists('content', $changeSet->getValues());
                 }),
             );
 
@@ -142,7 +144,7 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
         $this->persister->expects($this->once())->method('delete');
 
         $this->entityManager->persist($post);
@@ -157,7 +159,7 @@ final class EntityManagerTest extends TestCase
     {
         $post = PostBuilder::aPost()->build();
 
-        $this->persister->expects($this->once())->method('insert')->willReturn(1);
+        $this->persister->expects($this->once())->method('insert')->willReturn('1');
         $this->persister->expects($this->never())->method('delete');
 
         $this->entityManager->persist($post);

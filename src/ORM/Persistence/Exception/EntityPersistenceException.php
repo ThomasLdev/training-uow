@@ -6,6 +6,7 @@ namespace TrainingUow\ORM\Persistence\Exception;
 
 use RuntimeException;
 use Symfony\Component\DependencyInjection\Attribute\Exclude;
+use TrainingUow\ORM\Entity\Enum\EntityState;
 
 #[Exclude]
 class EntityPersistenceException extends RuntimeException
@@ -28,5 +29,16 @@ class EntityPersistenceException extends RuntimeException
     public static function insertFailed(string $table): self
     {
         return new self(sprintf('Failed to insert into table "%s".', $table));
+    }
+
+    public static function cannotInsertNotNewEntity(string $entityClass, EntityState $currentState): self
+    {
+        return new self(
+            sprintf(
+                'Trying to insert an entity of class %s with state %s',
+                $entityClass,
+                $currentState->value,
+            ),
+        );
     }
 }

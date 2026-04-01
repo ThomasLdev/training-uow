@@ -6,7 +6,7 @@ namespace TrainingUow\ORM\Entity;
 
 use ReflectionException;
 
-readonly class EntityManager
+final readonly class EntityManager
 {
     public function __construct(private UnitOfWork $unitOfWork) {}
 
@@ -31,7 +31,7 @@ readonly class EntityManager
         $this->unitOfWork->remove($entity);
     }
 
-    public function find(object $entity): ?object
+    public function find(): null
     {
         // TODO : implement find
         return null;
